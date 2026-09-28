@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "jev": {
+      "command": "bun",
+      "args": ["run", "/ABSOLUTE/PATH/TO/typesafe-mcp/src/index.ts"],
+      "env": {
+        "OPENJEV_API_KEY": "<paste-your-openjev-key-here>",
+        "JEV_PROVIDER": "openjev"
+      }
+    }
+  }
+}

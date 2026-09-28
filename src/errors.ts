@@ -65,7 +65,7 @@ export function classify(err: unknown): ClassifiedError {
   if (err instanceof ConfigError) {
     return {
       category: "CONFIG",
-      hint: "Set TYPESAFE_API_KEY in the MCP server env (host config → env, or the process environment). Get a key at console.typesafe.ai.",
+      hint: "Set TYPESAFE_API_KEY in the MCP server env (host config → env, or the process environment). Get a key at console.typesafe.ai. Alternatively, set JEV_PROVIDER=openjev and OPENJEV_API_KEY to use OpenJEV (free, https://openjev.sh/dashboard).",
     };
   }
   if (err instanceof z.ZodError) {
@@ -102,10 +102,10 @@ export function classify(err: unknown): ClassifiedError {
     if (err.requestId) classified.requestId = err.requestId;
     return classified;
   }
-  if (err instanceof APIError && err.status === 529) {
+  if (err instanceof APIError && (err.status === 529 || err.status === 503)) {
     const classified: ClassifiedError = {
       category: "OVERLOADED",
-      hint: "TypeSafe is temporarily overloaded. Retry shortly.",
+      hint: "The Jev API is temporarily overloaded. Retry shortly.",
     };
     if (err.requestId) classified.requestId = err.requestId;
     return classified;
@@ -119,7 +119,7 @@ export function classify(err: unknown): ClassifiedError {
   if (err instanceof APIConnectionError) {
     return {
       category: "NETWORK",
-      hint: "Could not reach api.typesafe.ai. Check connectivity/proxy.",
+      hint: "Could not reach the Jev API endpoint. Check connectivity/proxy.",
     };
   }
   if (err instanceof APIError) {
@@ -138,13 +138,16 @@ export function classify(err: unknown): ClassifiedError {
 
 export function redact(text: string, secret: string | undefined = process.env.TYPESAFE_API_KEY): string {
   let out = text.replace(/Bearer\s+\S+/gi, "Bearer ***");
-  const key = secret?.trim();
-  if (!key) return out;
-  out = out.split(key).join("***");
-  if (key.length >= 5) {
-    for (let n = key.length - 1; n >= 5; n -= 1) {
-      const prefix = key.slice(0, n);
-      if (out.includes(prefix)) out = out.split(prefix).join("***");
+  const secrets = secret ? [secret] : [process.env.TYPESAFE_API_KEY, process.env.OPENJEV_API_KEY].filter(Boolean) as string[];
+  for (const s of secrets) {
+    const key = s.trim();
+    if (!key) continue;
+    out = out.split(key).join("***");
+    if (key.length >= 5) {
+      for (let n = key.length - 1; n >= 5; n -= 1) {
+        const prefix = key.slice(0, n);
+        if (out.includes(prefix)) out = out.split(prefix).join("***");
+      }
     }
   }
   return out;

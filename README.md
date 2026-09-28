@@ -33,6 +33,12 @@ flowchart LR
 - **TypeSafe** — the company and API (`api.typesafe.ai/v1/systemone`) plus official JS/Python SDKs.
 - **This server** — a type-safe MCP wrapper. `decision` is computed in code by this server, never Jev's own opinion about whether you may proceed.
 
+
+---
+
+> **OpenJEV support:** Jev is built by [TypeSafe](https://typesafe.ai). This fork keeps TypeSafe as the default and adds optional support for [OpenJEV](https://openjev.sh), a free community gateway to the same Jev model — set `OPENJEV_API_KEY` (or `JEV_PROVIDER=openjev`) to use it. Original project: https://github.com/MarkChu-git/typesafe-mcp by @MarkChu-git.
+
+
 ## Install
 
 Add to any MCP host config — Cursor, Claude Desktop, Claude Code, Windsurf, Cline, or a custom stdio client:
@@ -46,6 +52,9 @@ Add to any MCP host config — Cursor, Claude Desktop, Claude Code, Windsurf, Cl
       "env": {
         "TYPESAFE_API_KEY": "<paste-your-key-here>",
         "TYPESAFE_DEFAULT_MODEL": "jev-latest"
+        // Optional: use OpenJEV (free) instead of TypeSafe:
+        // "OPENJEV_API_KEY": "<openjev-key>",
+        // "JEV_PROVIDER": "openjev"
       }
     }
   }

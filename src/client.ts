@@ -15,12 +15,15 @@ export function getClient(deps: ClientDeps = {}): TypeSafeClient {
   if (cached) return cached;
   const cfg: RuntimeConfig = readConfig(deps.env);
   if (!cfg.apiKey) {
+    const keyName = cfg.provider === "openjev" ? "OPENJEV_API_KEY" : "TYPESAFE_API_KEY";
+    const keyUrl = cfg.provider === "openjev" ? "https://openjev.sh/dashboard" : "https://console.typesafe.ai";
     throw new ConfigError(
-      "TYPESAFE_API_KEY is not set. Add it to the MCP server env in your host config (stdio spawn env). Get a key at https://console.typesafe.ai",
+      `${keyName} is not set. Add it to the MCP server env in your host config (stdio spawn env). Get a key at ${keyUrl}. You can also set JEV_PROVIDER=openjev with OPENJEV_API_KEY to use OpenJEV, a free community gateway to the same Jev model.`,
     );
   }
   cached = new TypeSafeClient({
     apiKey: cfg.apiKey,
+    baseURL: cfg.baseURL,
     defaultModel: cfg.defaultModel,
     timeout: cfg.timeoutMs,
     fetch: deps.fetch ?? defaultFetch,
